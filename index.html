@@ -268,6 +268,37 @@ function isActualBet(b) {
   return !isHousekeepingRow(b) && !isPayInRow(b);
 }
 
+function parseBetDate(value) {
+  if (!value) return 0;
+
+  const text = String(value).trim();
+
+  // Handles DD/MM/YYYY
+  const uk = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if (uk) {
+    const [, d, m, y] = uk;
+    return new Date(Number(y), Number(m) - 1, Number(d)).getTime();
+  }
+
+  // Handles ISO-style dates as a fallback
+  const fallback = Date.parse(text);
+
+  return Number.isNaN(fallback) ? 0 : fallback;
+}
+
+function sortBetDateDesc(a, b) {
+  const dateDiff = parseBetDate(b.date) - parseBetDate(a.date);
+
+  if (dateDiff !== 0) return dateDiff;
+
+  const tournamentDiff = String(a.tournament || "").localeCompare(String(b.tournament || ""));
+
+  if (tournamentDiff !== 0) return tournamentDiff;
+
+  return Number(b.pl || 0) - Number(a.pl || 0);
+}
+
 function buildSummary(name, rows, apiSummary = {}) {
   const profit = rows.reduce((a,b) => a + Number(b.pl || 0), 0);
   const stake = rows.reduce((a,b) => a + Number(b.stake || 0), 0);
@@ -321,9 +352,12 @@ function rebuildTournamentSelect() {
 }
 
 function getRows() {
-  return current === "ALL"
+  const rows = current === "ALL"
     ? DATA.bets
     : DATA.bets.filter(b => b.tournament === current);
+
+  // Graphs and KPI calculations use chronological order.
+  return [...rows].sort((a, b) => parseBetDate(a.date) - parseBetDate(b.date));
 }
 
 function summary(rows) {
@@ -452,8 +486,7 @@ function render() {
     : `<div class="small">No bets loaded yet.</div>`;
 
   betRows.innerHTML = [...rows]
-    .reverse()
-    .slice(0, 180)
+    .sort((a, b) => sortBetDateDesc(a, b))
     .map(b => `
       <tr>
         <td>${escapeHtml(b.date || "")}</td>
