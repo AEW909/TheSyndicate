@@ -3,41 +3,591 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>THE SYNDICATE // Data Visualiser</title>
+<title>THE SYNDICATE // Live Data Visualiser</title>
 <style>
 :root{--bg:#050712;--panel:rgba(12,18,38,.72);--line:rgba(124,240,255,.28);--text:#eaf8ff;--muted:#8fa8bd;--cyan:#48f6ff;--pink:#ff3df2;--green:#3dff9f;--red:#ff4b6e;--amber:#ffd166;}
-*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 25% 10%,#172a55 0,#050712 38%,#02030a 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial;overflow-x:hidden} canvas#bg{position:fixed;inset:0;z-index:-1;opacity:.65}.wrap{max-width:1500px;margin:0 auto;padding:24px}.hero{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;align-items:stretch}.card{background:linear-gradient(135deg,rgba(16,24,50,.82),rgba(6,10,22,.74));border:1px solid var(--line);border-radius:24px;box-shadow:0 0 40px rgba(72,246,255,.09),inset 0 0 30px rgba(255,255,255,.025);backdrop-filter:blur(16px);position:relative;overflow:hidden}.card:before{content:"";position:absolute;inset:-1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);height:1px;opacity:.7}.title{padding:28px}.eyebrow{color:var(--cyan);letter-spacing:.28em;font-size:12px;text-transform:uppercase}.title h1{font-size:clamp(38px,6vw,84px);line-height:.9;margin:12px 0;text-shadow:0 0 24px rgba(72,246,255,.35)}.subtitle{color:var(--muted);font-size:18px}.controls{padding:22px;display:flex;flex-direction:column;gap:16px}select,button{background:#071124;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px 14px;font-size:15px;outline:none}button{cursor:pointer}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:18px 0}.kpi{padding:18px;min-height:120px}.kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.16em}.kpi .value{font-size:34px;font-weight:800;margin-top:10px}.pos{color:var(--green)}.neg{color:var(--red)}.main{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.chartBox{height:390px;padding:18px}.chartBox canvas{width:100%;height:310px}.sectionTitle{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d8fbff;margin:0 0 12px}.leader{padding:18px}.row{display:grid;grid-template-columns:58px 1fr 88px;gap:12px;padding:10px 0;border-bottom:1px solid rgba(124,240,255,.12);align-items:center}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--cyan);font-size:12px;text-align:center}.small{color:var(--muted);font-size:12px;margin-top:3px}.tableCard{margin-top:16px;padding:18px}.tableWrap{max-height:420px;overflow:auto;border-radius:16px;border:1px solid rgba(124,240,255,.14)}table{width:100%;border-collapse:collapse;font-size:13px}th{position:sticky;top:0;background:#09152c;color:var(--cyan);text-align:left;padding:10px;z-index:2}td{padding:9px 10px;border-bottom:1px solid rgba(124,240,255,.08);color:#d8edf7}.ticker{margin-top:16px;padding:14px 18px;white-space:nowrap;overflow:hidden}.ticker span{display:inline-block;padding-left:100%;animation:ticker 120s linear infinite;color:#b7f7ff}@keyframes ticker{to{transform:translateX(-100%)}}.tournamentGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}.mini{padding:14px;cursor:pointer;transition:.2s}.mini:hover{transform:translateY(-3px);border-color:rgba(72,246,255,.8)}.bar{height:8px;background:#121a31;border-radius:999px;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--green));border-radius:999px}.footer{color:var(--muted);font-size:12px;margin:18px 0} @media(max-width:900px){.hero,.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:14px}.chartBox{height:330px}}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 25% 10%,#172a55 0,#050712 38%,#02030a 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial;overflow-x:hidden}
+canvas#bg{position:fixed;inset:0;z-index:-1;opacity:.65}
+.wrap{max-width:1500px;margin:0 auto;padding:24px}
+.hero{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;align-items:stretch}
+.card{background:linear-gradient(135deg,rgba(16,24,50,.82),rgba(6,10,22,.74));border:1px solid var(--line);border-radius:24px;box-shadow:0 0 40px rgba(72,246,255,.09),inset 0 0 30px rgba(255,255,255,.025);backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;inset:-1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);height:1px;opacity:.7}
+.title{padding:28px}
+.eyebrow{color:var(--cyan);letter-spacing:.28em;font-size:12px;text-transform:uppercase}
+.title h1{font-size:clamp(38px,6vw,84px);line-height:.9;margin:12px 0;text-shadow:0 0 24px rgba(72,246,255,.35)}
+.subtitle{color:var(--muted);font-size:18px}
+.controls{padding:22px;display:flex;flex-direction:column;gap:16px}
+select,button,input{background:#071124;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px 14px;font-size:15px;outline:none}
+button{cursor:pointer}
+button:hover{border-color:rgba(72,246,255,.8)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:18px 0}
+.kpi{padding:18px;min-height:120px}
+.kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.16em}
+.kpi .value{font-size:34px;font-weight:800;margin-top:10px}
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+.neutral{color:var(--cyan)}
+.main{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+.chartBox{height:390px;padding:18px}
+.chartBox canvas{width:100%;height:310px}
+.sectionTitle{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d8fbff;margin:0 0 12px}
+.leader{padding:18px}
+.row{display:grid;grid-template-columns:58px 1fr 88px;gap:12px;padding:10px 0;border-bottom:1px solid rgba(124,240,255,.12);align-items:center}
+.pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--cyan);font-size:12px;text-align:center}
+.small{color:var(--muted);font-size:12px;margin-top:3px}
+.tableCard{margin-top:16px;padding:18px}
+.tableWrap{max-height:420px;overflow:auto;border-radius:16px;border:1px solid rgba(124,240,255,.14)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:#09152c;color:var(--cyan);text-align:left;padding:10px;z-index:2}
+td{padding:9px 10px;border-bottom:1px solid rgba(124,240,255,.08);color:#d8edf7;vertical-align:top}
+.ticker{margin-top:16px;padding:14px 18px;white-space:nowrap;overflow:hidden}
+.ticker span{display:inline-block;padding-left:100%;animation:ticker 120s linear infinite;color:#b7f7ff}
+@keyframes ticker{to{transform:translateX(-100%)}}
+.tournamentGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
+.mini{padding:14px;cursor:pointer;transition:.2s}
+.mini:hover{transform:translateY(-3px);border-color:rgba(72,246,255,.8)}
+.bar{height:8px;background:#121a31;border-radius:999px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--green));border-radius:999px}
+.footer{color:var(--muted);font-size:12px;margin:18px 0}
+.status{border:1px solid rgba(124,240,255,.22);border-radius:16px;padding:12px 14px;background:rgba(7,17,36,.55)}
+.status strong{color:var(--cyan)}
+.hidden{display:none}
+.error{border-color:rgba(255,75,110,.55);color:#ffdce3}
+.loadingPulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+@media(max-width:900px){.hero,.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:14px}.chartBox{height:330px}}
 </style>
 </head>
-<body><canvas id="bg"></canvas><div class="wrap">
-<div class="hero"><div class="card title"><div class="eyebrow">football betting telemetry</div><h1>THE SYNDICATE</h1><div class="subtitle">Interactive tournament dashboard built from the Google Sheet. Filter by competition, inspect profit trajectory, expose chaos.</div></div><div class="card controls"><label class="eyebrow">Tournament</label><select id="tournament"></select><button id="allBtn">Show All-Time Data</button><div class="small">Tip: click any tournament tile below to jump the dashboard.</div></div></div>
-<div class="grid"><div class="card kpi"><div class="label">Net P/L</div><div id="kProfit" class="value">—</div></div><div class="card kpi"><div class="label">Total Staked</div><div id="kStake" class="value">—</div></div><div class="card kpi"><div class="label">Win Rate</div><div id="kWin" class="value">—</div></div><div class="card kpi"><div class="label">ROI</div><div id="kRoi" class="value">—</div></div></div>
-<div class="main"><div class="card chartBox"><h3 class="sectionTitle">Cumulative Profit Trace</h3><canvas id="lineChart"></canvas></div><div class="card leader"><h3 class="sectionTitle">Biggest Hits</h3><div id="leader"></div></div></div>
-<div class="ticker card"><span id="tickerText"></span></div>
-<div class="card tableCard"><h3 class="sectionTitle">Bet Log</h3><div class="tableWrap"><table><thead><tr><th>Date</th><th>Tournament</th><th>Match</th><th>Selection</th><th>Stake</th><th>Odds</th><th>Result</th><th>P/L</th><th>Comment</th></tr></thead><tbody id="betRows"></tbody></table></div></div>
-<h3 class="sectionTitle" style="margin-top:20px">Tournament Archive</h3><div id="tiles" class="tournamentGrid"></div>
-<div class="footer">Source: THE SYNDICATE Google Sheet, modified 2026-06-18. WC 2026 includes the initial PAY IN and uses 13 members for per-member calculations.</div>
+
+<body>
+<canvas id="bg"></canvas>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="card title">
+      <div class="eyebrow">football betting telemetry</div>
+      <h1>THE SYNDICATE</h1>
+      <div class="subtitle">Live tournament dashboard powered by the Google Sheet API. Filter by competition, inspect profit trajectory, expose chaos.</div>
+    </div>
+
+    <div class="card controls">
+      <label class="eyebrow">Tournament</label>
+      <select id="tournament"></select>
+      <button id="allBtn">Show All-Time Data</button>
+      <button id="refreshBtn">Refresh Live Data</button>
+      <div id="apiStatus" class="status small loadingPulse">Awaiting live data...</div>
+      <div class="small">Future tournament tabs are added automatically when the API returns them.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card kpi"><div class="label">Net P/L</div><div id="kProfit" class="value">—</div></div>
+    <div class="card kpi"><div class="label">Total Staked</div><div id="kStake" class="value">—</div></div>
+    <div class="card kpi"><div class="label">Win Rate</div><div id="kWin" class="value">—</div></div>
+    <div class="card kpi"><div class="label">ROI</div><div id="kRoi" class="value">—</div></div>
+  </div>
+
+  <div class="main">
+    <div class="card chartBox">
+      <h3 class="sectionTitle">Cumulative Profit Trace</h3>
+      <canvas id="lineChart"></canvas>
+    </div>
+    <div class="card leader">
+      <h3 class="sectionTitle">Biggest Hits</h3>
+      <div id="leader"></div>
+    </div>
+  </div>
+
+  <div class="ticker card"><span id="tickerText"></span></div>
+
+  <div class="card tableCard">
+    <h3 class="sectionTitle">Bet Log</h3>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Tournament</th><th>Match</th><th>Selection</th><th>Stake</th><th>Odds</th><th>Result</th><th>P/L</th><th>Comment</th>
+          </tr>
+        </thead>
+        <tbody id="betRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3 class="sectionTitle" style="margin-top:20px">Tournament Archive</h3>
+  <div id="tiles" class="tournamentGrid"></div>
+
+  <div class="footer">
+    Source: THE SYNDICATE Google Sheet API. This page is static; all tournament data is fetched live from the Apps Script endpoint.
+  </div>
 </div>
+
 <script>
-const DATA = REPLACE_ME;
-const fmtGBP = v => (v<0?'-':'')+'£'+Math.abs(v).toLocaleString(undefined,{maximumFractionDigits:0});
-const fmtPct = v => (v>0?'+':'')+v.toFixed(1)+'%';
-const cls = v => v>=0?'pos':'neg';
-const sel=document.getElementById('tournament');
-DATA.summaries.forEach(s=>{let o=document.createElement('option');o.value=s.name;o.textContent=s.name;sel.appendChild(o)});
-let current='ALL';
-const canvas=document.getElementById('lineChart'), ctx=canvas.getContext('2d');
-function resizeCanvas(){canvas.width=canvas.clientWidth*devicePixelRatio;canvas.height=canvas.clientHeight*devicePixelRatio;} window.addEventListener('resize',()=>{resizeCanvas();render()}); resizeCanvas();
-function drawLine(rows){ctx.clearRect(0,0,canvas.width,canvas.height); const w=canvas.width,h=canvas.height,p=46*devicePixelRatio; let c=0, pts=rows.map((b,i)=>{c+=b.pl;return {x:i,y:c,b}}); if(!pts.length)return; let min=Math.min(0,...pts.map(p=>p.y)),max=Math.max(0,...pts.map(p=>p.y)); if(max===min){max+=1;min-=1} ctx.strokeStyle='rgba(124,240,255,.18)';ctx.lineWidth=1*devicePixelRatio; for(let i=0;i<5;i++){let y=p+(h-2*p)*i/4;ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(w-p,y);ctx.stroke();}
- const X=i=>p+(w-2*p)*(pts.length<=1?0:i/(pts.length-1)); const Y=v=>h-p-(h-2*p)*(v-min)/(max-min); let grd=ctx.createLinearGradient(0,0,w,0);grd.addColorStop(0,'#ff3df2');grd.addColorStop(.5,'#48f6ff');grd.addColorStop(1,'#3dff9f'); ctx.strokeStyle=grd;ctx.lineWidth=4*devicePixelRatio;ctx.shadowColor='#48f6ff';ctx.shadowBlur=16*devicePixelRatio;ctx.beginPath();pts.forEach((pt,i)=>{let x=X(i),y=Y(pt.y); if(i)ctx.lineTo(x,y); else ctx.moveTo(x,y)});ctx.stroke();ctx.shadowBlur=0; ctx.strokeStyle='rgba(255,255,255,.35)';ctx.beginPath();ctx.moveTo(p,Y(0));ctx.lineTo(w-p,Y(0));ctx.stroke(); ctx.fillStyle='#8fa8bd';ctx.font=`${12*devicePixelRatio}px system-ui`;ctx.fillText(fmtGBP(max),8*devicePixelRatio,Y(max)+4*devicePixelRatio);ctx.fillText(fmtGBP(min),8*devicePixelRatio,Y(min)+4*devicePixelRatio);}
-function getRows(){return current==='ALL'?DATA.bets:DATA.bets.filter(b=>b.tournament===current)}
-function summary(rows){let p=rows.reduce((a,b)=>a+b.pl,0), st=rows.reduce((a,b)=>a+b.stake,0), w=rows.filter(b=>b.pl>0).length; return {profit:p,stake:st,wins:w,bets:rows.length,winRate:w/Math.max(1,rows.length)*100,roi:p/Math.max(1,st)*100}}
-function render(){let rows=getRows(), s=summary(rows); ['Profit','Stake','Win','Roi'].forEach(()=>{}); kProfit.textContent=fmtGBP(s.profit);kProfit.className='value '+cls(s.profit); kStake.textContent=fmtGBP(s.stake); kWin.textContent=s.winRate.toFixed(1)+'%';kRoi.textContent=fmtPct(s.roi);kRoi.className='value '+cls(s.roi); drawLine(rows); let top=[...rows].sort((a,b)=>b.pl-a.pl).slice(0,6); leader.innerHTML=top.map((b,i)=>`<div class="row"><div class="pill">#${i+1}</div><div><b>${b.selection}</b><div class="small">${b.match} · ${b.tournament}</div></div><div class="${cls(b.pl)}"><b>${fmtGBP(b.pl)}</b></div></div>`).join(''); betRows.innerHTML=[...rows].reverse().slice(0,180).map(b=>`<tr><td>${b.date||''}</td><td>${b.tournament}</td><td>${b.match}</td><td>${b.selection}</td><td>${fmtGBP(b.stake)}</td><td>${b.odds??''}</td><td>${b.result}</td><td class="${cls(b.pl)}">${fmtGBP(b.pl)}</td><td>${b.comments||''}</td></tr>`).join('');}
-sel.addEventListener('change',e=>{current=e.target.value;render()}); allBtn.onclick=()=>{current='ALL';sel.selectedIndex=-1;render()};
-tickerText.textContent=DATA.comments.filter(x=>x.comments).slice(0,70).map(x=>`${x.tournament}: ${x.comments}`).join('   //   ');
-tiles.innerHTML=DATA.summaries.map(s=>`<div class="card mini" data-t="${s.name}"><b>${s.name}</b><div class="small">${s.bets} bets · ${s.winRate}% wins · ROI ${fmtPct(s.roi)}</div><div class="value ${cls(s.profit)}" style="font-size:24px">${fmtGBP(s.profit)}</div><div class="bar"><i style="width:${Math.min(100,Math.max(6,Math.abs(s.roi)*2))}%"></i></div></div>`).join('');
-document.querySelectorAll('.mini').forEach(el=>el.onclick=()=>{current=el.dataset.t;sel.value=current;render();scrollTo({top:0,behavior:'smooth'})});
-current=DATA.summaries[0]?.name||'ALL';sel.value=current;render();
+/**
+ * Paste your deployed Apps Script Web App URL here.
+ * It should look like:
+ * https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxx/exec
+ */
+const API_URL = "https://script.google.com/macros/s/AKfycbxd5Q-1ipWum_XpLY5O-E2WsJP01_DP73fK9CW8viRWBOEC0i2CEonefzSWSyWdOcwF/exec";
+
+let DATA = { bets: [], summaries: [], comments: [], topBets: [], worstBets: [], raw: null };
+let current = "ALL";
+
+const fmtGBP = v => {
+  const n = Number(v || 0);
+  return (n < 0 ? "-" : "") + "£" + Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+};
+
+const fmtGBP2 = v => {
+  const n = Number(v || 0);
+  return (n < 0 ? "-" : "") + "£" + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const fmtPct = v => {
+  const n = Number(v || 0);
+  return (n > 0 ? "+" : "") + n.toFixed(1) + "%";
+};
+
+const cls = v => Number(v || 0) >= 0 ? "pos" : "neg";
+
+const sel = document.getElementById("tournament");
+const canvas = document.getElementById("lineChart");
+const ctx = canvas.getContext("2d");
+
+function setStatus(message, type = "neutral") {
+  const el = document.getElementById("apiStatus");
+  el.className = "status small";
+  if (type === "error") el.classList.add("error");
+  if (type === "loading") el.classList.add("loadingPulse");
+  el.innerHTML = message;
+}
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+}
+
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  render();
+});
+
+resizeCanvas();
+
+async function loadData() {
+  if (!API_URL || API_URL.includes("PASTE_YOUR")) {
+    setStatus("Add your Apps Script Web App URL inside <strong>API_URL</strong>.", "error");
+    return;
+  }
+
+  setStatus("Fetching live sheet data...", "loading");
+
+  try {
+    const res = await fetch(API_URL + "?cacheBust=" + Date.now(), { method: "GET" });
+
+    if (!res.ok) {
+      throw new Error("API returned HTTP " + res.status);
+    }
+
+    const json = await res.json();
+
+    DATA = normaliseApiData(json);
+
+    rebuildTournamentSelect();
+
+    current = DATA.summaries[0]?.name || "ALL";
+    sel.value = current;
+
+    render();
+    renderTiles();
+    renderTicker();
+
+    const updated = json.updated ? new Date(json.updated).toLocaleString() : "unknown";
+    setStatus(`Live data loaded · <strong>${DATA.summaries.length}</strong> tournaments · updated ${updated}`);
+
+  } catch (err) {
+    console.error(err);
+    setStatus("Could not load live data. Check the Apps Script URL, deployment permissions, and browser console.", "error");
+  }
+}
+
+function normaliseApiData(api) {
+  const tournaments = Array.isArray(api.tournaments) ? api.tournaments : [];
+
+  const bets = [];
+  const summaries = [];
+  const comments = [];
+
+  for (const tournament of tournaments) {
+    const name = tournament.name || "Unknown";
+    const rows = Array.isArray(tournament.bets) ? tournament.bets : [];
+
+    const normalisedRows = rows
+      .filter(b => b && (b.match || b.selection))
+      .map(b => ({
+        tournament: b.tournament || name,
+        date: b.date || "",
+        match: b.match || "",
+        selection: b.selection || "",
+        stake: Number(b.stake || 0),
+        odds: b.odds === null || b.odds === undefined || b.odds === "" ? null : Number(b.odds),
+        bookie: b.bookie || b.channel || "",
+        result: b.result || "",
+        pl: Number(b.pl || 0),
+        cumSheet: b.cumulative === null || b.cumulative === undefined ? null : Number(b.cumulative),
+        perMember: b.perMember === null || b.perMember === undefined ? null : Number(b.perMember),
+        placer: b.betPlacer || b.placer || "",
+        comments: b.comments || ""
+      }))
+      .filter(b => !isHousekeepingRow(b));
+
+    bets.push(...normalisedRows);
+    comments.push(...normalisedRows.filter(b => b.comments));
+
+    summaries.push(buildSummary(name, normalisedRows));
+  }
+
+  const topBets = [...bets].filter(b => !isPayInRow(b)).sort((a,b) => b.pl - a.pl).slice(0, 12);
+  const worstBets = [...bets].filter(b => !isPayInRow(b)).sort((a,b) => a.pl - b.pl).slice(0, 8);
+
+  return { bets, summaries, comments, topBets, worstBets, raw: api };
+}
+
+function isHousekeepingRow(b) {
+  const selection = String(b.selection || "").trim().toLowerCase();
+  const match = String(b.match || "").trim().toLowerCase();
+  return selection === "total stake" && !match;
+}
+
+function isPayInRow(b) {
+  return String(b.match || "").trim().toLowerCase() === "pay in";
+}
+
+function isActualBet(b) {
+  return !isHousekeepingRow(b) && !isPayInRow(b);
+}
+
+function buildSummary(name, rows, apiSummary = {}) {
+  const profit = rows.reduce((a,b) => a + Number(b.pl || 0), 0);
+  const stake = rows.reduce((a,b) => a + Number(b.stake || 0), 0);
+  const wins = rows.filter(b => String(b.result).toUpperCase() === "W").length;
+  const losses = rows.filter(b => String(b.result).toUpperCase() === "L").length;
+  const settled = rows.filter(b => b.result).length || rows.length;
+  const winRate = settled ? wins / settled * 100 : 0;
+  const roi = stake ? profit / stake * 100 : 0;
+
+  let c = 0;
+  const series = rows.map(b => {
+    if (b.cumSheet !== null && !Number.isNaN(b.cumSheet)) return b.cumSheet;
+    c += Number(b.pl || 0);
+    return c;
+  });
+
+  const actualRows = rows.filter(isActualBet);
+  const actualStake = actualRows.reduce((a,b) => a + Number(b.stake || 0), 0);
+  const actualWins = actualRows.filter(b => String(b.result).toUpperCase() === "W").length;
+  const actualLosses = actualRows.filter(b => String(b.result).toUpperCase() === "L").length;
+  const actualSettled = actualRows.filter(b => b.result).length || actualRows.length;
+  const actualWinRate = actualSettled ? actualWins / actualSettled * 100 : 0;
+  const actualRoi = actualStake ? profit / actualStake * 100 : 0;
+
+  return {
+    name,
+    profit,
+    stake: actualStake,
+    bets: actualRows.length,
+    wins: actualWins,
+    losses: actualLosses,
+    winRate: actualWinRate,
+    roi: actualRoi,
+    peak: series.length ? Math.max(...series) : 0,
+    trough: series.length ? Math.min(...series) : 0,
+    series,
+    best: [...rows].sort((a,b) => b.pl - a.pl)[0] || null,
+    worst: [...rows].sort((a,b) => a.pl - b.pl)[0] || null,
+    latestBet: apiSummary.latestBet || rows.at(-1) || null
+  };
+}
+
+function rebuildTournamentSelect() {
+  sel.innerHTML = "";
+  DATA.summaries.forEach(s => {
+    const o = document.createElement("option");
+    o.value = s.name;
+    o.textContent = s.name;
+    sel.appendChild(o);
+  });
+}
+
+function getRows() {
+  return current === "ALL"
+    ? DATA.bets
+    : DATA.bets.filter(b => b.tournament === current);
+}
+
+function summary(rows) {
+  const p = rows.reduce((a,b) => a + Number(b.pl || 0), 0);
+  const actualRows = rows.filter(isActualBet);
+  const st = actualRows.reduce((a,b) => a + Number(b.stake || 0), 0);
+  const settled = actualRows.filter(b => b.result).length || actualRows.length;
+  const w = actualRows.filter(b => String(b.result).toUpperCase() === "W").length;
+
+  return {
+    profit: p,
+    stake: st,
+    wins: w,
+    bets: actualRows.length,
+    winRate: settled ? w / settled * 100 : 0,
+    roi: st ? p / st * 100 : 0
+  };
+}
+
+function drawLine(rows) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const p = 46 * devicePixelRatio;
+
+  if (!rows.length) return;
+
+  let cumulative = 0;
+  const pts = rows.map((b, i) => {
+    let y;
+    if (b.cumSheet !== null && b.cumSheet !== undefined && !Number.isNaN(b.cumSheet)) {
+      y = Number(b.cumSheet);
+      cumulative = y;
+    } else {
+      cumulative += Number(b.pl || 0);
+      y = cumulative;
+    }
+
+    return { x: i, y, b };
+  });
+
+  let min = Math.min(0, ...pts.map(p => p.y));
+  let max = Math.max(0, ...pts.map(p => p.y));
+
+  if (max === min) {
+    max += 1;
+    min -= 1;
+  }
+
+  ctx.strokeStyle = "rgba(124,240,255,.18)";
+  ctx.lineWidth = 1 * devicePixelRatio;
+
+  for (let i = 0; i < 5; i++) {
+    const y = p + (h - 2 * p) * i / 4;
+    ctx.beginPath();
+    ctx.moveTo(p, y);
+    ctx.lineTo(w - p, y);
+    ctx.stroke();
+  }
+
+  const X = i => p + (w - 2 * p) * (pts.length <= 1 ? 0 : i / (pts.length - 1));
+  const Y = v => h - p - (h - 2 * p) * (v - min) / (max - min);
+
+  const grd = ctx.createLinearGradient(0, 0, w, 0);
+  grd.addColorStop(0, "#ff3df2");
+  grd.addColorStop(.5, "#48f6ff");
+  grd.addColorStop(1, "#3dff9f");
+
+  ctx.strokeStyle = grd;
+  ctx.lineWidth = 4 * devicePixelRatio;
+  ctx.shadowColor = "#48f6ff";
+  ctx.shadowBlur = 16 * devicePixelRatio;
+  ctx.beginPath();
+
+  pts.forEach((pt, i) => {
+    const x = X(i);
+    const y = Y(pt.y);
+    if (i) ctx.lineTo(x, y);
+    else ctx.moveTo(x, y);
+  });
+
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.strokeStyle = "rgba(255,255,255,.35)";
+  ctx.beginPath();
+  ctx.moveTo(p, Y(0));
+  ctx.lineTo(w - p, Y(0));
+  ctx.stroke();
+
+  ctx.fillStyle = "#8fa8bd";
+  ctx.font = `${12 * devicePixelRatio}px system-ui`;
+  ctx.fillText(fmtGBP(max), 8 * devicePixelRatio, Y(max) + 4 * devicePixelRatio);
+  ctx.fillText(fmtGBP(min), 8 * devicePixelRatio, Y(min) + 4 * devicePixelRatio);
+}
+
+function render() {
+  const rows = getRows();
+  const s = summary(rows);
+
+  kProfit.textContent = fmtGBP(s.profit);
+  kProfit.className = "value " + cls(s.profit);
+
+  kStake.textContent = fmtGBP(s.stake);
+  kWin.textContent = s.winRate.toFixed(1) + "%";
+
+  kRoi.textContent = fmtPct(s.roi);
+  kRoi.className = "value " + cls(s.roi);
+
+  drawLine(rows);
+
+  const top = [...rows].filter(b => !isPayInRow(b)).sort((a,b) => b.pl - a.pl).slice(0, 6);
+
+  leader.innerHTML = top.length
+    ? top.map((b,i) => `
+      <div class="row">
+        <div class="pill">#${i+1}</div>
+        <div>
+          <b>${escapeHtml(b.selection)}</b>
+          <div class="small">${escapeHtml(b.match)} · ${escapeHtml(b.tournament)}</div>
+        </div>
+        <div class="${cls(b.pl)}"><b>${fmtGBP(b.pl)}</b></div>
+      </div>
+    `).join("")
+    : `<div class="small">No bets loaded yet.</div>`;
+
+  betRows.innerHTML = [...rows]
+    .reverse()
+    .slice(0, 180)
+    .map(b => `
+      <tr>
+        <td>${escapeHtml(b.date || "")}</td>
+        <td>${escapeHtml(b.tournament)}</td>
+        <td>${escapeHtml(b.match)}</td>
+        <td>${escapeHtml(b.selection)}</td>
+        <td>${fmtGBP(b.stake)}</td>
+        <td>${b.odds ?? ""}</td>
+        <td>${escapeHtml(b.result)}</td>
+        <td class="${cls(b.pl)}">${fmtGBP(b.pl)}</td>
+        <td>${escapeHtml(b.comments || "")}</td>
+      </tr>
+    `).join("");
+}
+
+function renderTiles() {
+  tiles.innerHTML = DATA.summaries.map(s => `
+    <div class="card mini" data-t="${escapeAttr(s.name)}">
+      <b>${escapeHtml(s.name)}</b>
+      <div class="small">${s.bets} bets · ${Number(s.winRate).toFixed(1)}% wins · ROI ${fmtPct(Number(s.roi))}</div>
+      <div class="value ${cls(s.profit)}" style="font-size:24px">${fmtGBP(s.profit)}</div>
+      <div class="bar"><i style="width:${Math.min(100, Math.max(6, Math.abs(Number(s.roi || 0)) * 2))}%"></i></div>
+    </div>
+  `).join("");
+
+  document.querySelectorAll(".mini").forEach(el => {
+    el.onclick = () => {
+      current = el.dataset.t;
+      sel.value = current;
+      render();
+      scrollTo({ top: 0, behavior: "smooth" });
+    };
+  });
+}
+
+function renderTicker() {
+  const commentText = DATA.comments
+    .filter(x => x.comments)
+    .slice(0, 70)
+    .map(x => `${x.tournament}: ${x.comments}`)
+    .join("   //   ");
+
+  const fallback = DATA.summaries
+    .map(s => `${s.name}: ${fmtGBP(s.profit)} · ROI ${fmtPct(Number(s.roi || 0))}`)
+    .join("   //   ");
+
+  tickerText.textContent = commentText || fallback || "Awaiting Syndicate telemetry...";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll("`", "&#096;");
+}
+
+sel.addEventListener("change", e => {
+  current = e.target.value;
+  render();
+});
+
+allBtn.onclick = () => {
+  current = "ALL";
+  sel.selectedIndex = -1;
+  render();
+};
+
+refreshBtn.onclick = loadData;
+
+loadData();
+
 // particle grid background
-const bg=document.getElementById('bg'), bctx=bg.getContext('2d');let particles=[];function bgResize(){bg.width=innerWidth*devicePixelRatio;bg.height=innerHeight*devicePixelRatio;particles=Array.from({length:90},()=>({x:Math.random()*bg.width,y:Math.random()*bg.height,vx:(Math.random()-.5)*.25*devicePixelRatio,vy:(Math.random()-.5)*.25*devicePixelRatio}))}addEventListener('resize',bgResize);bgResize();function anim(){bctx.clearRect(0,0,bg.width,bg.height);bctx.fillStyle='rgba(72,246,255,.65)';bctx.strokeStyle='rgba(72,246,255,.08)';for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>bg.width)p.vx*=-1;if(p.y<0||p.y>bg.height)p.vy*=-1;bctx.beginPath();bctx.arc(p.x,p.y,1.3*devicePixelRatio,0,Math.PI*2);bctx.fill()}for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){let a=particles[i],b=particles[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<150*devicePixelRatio){bctx.globalAlpha=1-d/(150*devicePixelRatio);bctx.beginPath();bctx.moveTo(a.x,a.y);bctx.lineTo(b.x,b.y);bctx.stroke();bctx.globalAlpha=1}}requestAnimationFrame(anim)}anim();
-</script></body></html>
+const bg = document.getElementById("bg");
+const bctx = bg.getContext("2d");
+let particles = [];
+
+function bgResize() {
+  bg.width = innerWidth * devicePixelRatio;
+  bg.height = innerHeight * devicePixelRatio;
+  particles = Array.from({ length: 90 }, () => ({
+    x: Math.random() * bg.width,
+    y: Math.random() * bg.height,
+    vx: (Math.random() - .5) * .25 * devicePixelRatio,
+    vy: (Math.random() - .5) * .25 * devicePixelRatio
+  }));
+}
+
+addEventListener("resize", bgResize);
+bgResize();
+
+function anim() {
+  bctx.clearRect(0, 0, bg.width, bg.height);
+  bctx.fillStyle = "rgba(72,246,255,.65)";
+  bctx.strokeStyle = "rgba(72,246,255,.08)";
+
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < 0 || p.x > bg.width) p.vx *= -1;
+    if (p.y < 0 || p.y > bg.height) p.vy *= -1;
+
+    bctx.beginPath();
+    bctx.arc(p.x, p.y, 1.3 * devicePixelRatio, 0, Math.PI * 2);
+    bctx.fill();
+  }
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i];
+      const b = particles[j];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+
+      if (d < 150 * devicePixelRatio) {
+        bctx.globalAlpha = 1 - d / (150 * devicePixelRatio);
+        bctx.beginPath();
+        bctx.moveTo(a.x, a.y);
+        bctx.lineTo(b.x, b.y);
+        bctx.stroke();
+        bctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  requestAnimationFrame(anim);
+}
+
+anim();
+</script>
+</body>
+</html>
