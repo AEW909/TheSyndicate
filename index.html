@@ -1,26 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="SODA_POP">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>THE SYNDICATE // Live Data Visualiser</title>
 <style>
-:root{--bg:#050712;--panel:rgba(12,18,38,.72);--line:rgba(124,240,255,.28);--text:#eaf8ff;--muted:#8fa8bd;--cyan:#48f6ff;--pink:#ff3df2;--green:#3dff9f;--red:#ff4b6e;--amber:#ffd166;}
+/* ============================================================
+   THEME PRESETS
+   Active theme is set via <html data-theme="..."> at the bottom
+   of <head>. To swap, change that single attribute value.
+   Available presets: SPACE, SODA_POP
+   ============================================================ */
+[data-theme="SPACE"]{
+  --bg:#050712;--panel:rgba(12,18,38,.72);--text:#eaf8ff;--muted:#8fa8bd;
+  --cyan:#48f6ff;--pink:#ff3df2;--green:#3dff9f;--red:#ff4b6e;--amber:#ffd166;
+  --line-rgb:124,240,255;--accent-rgb:72,246,255;
+  --line:rgba(124,240,255,.28);
+  --body-grad:radial-gradient(circle at 25% 10%,#172a55 0,#050712 38%,#02030a 100%);
+  --card-grad:linear-gradient(135deg,rgba(16,24,50,.82),rgba(6,10,22,.74));
+  --input-bg:#071124;--th-bg:#09152c;--bar-track:#121a31;
+  --chart-1:#ff3df2;--chart-2:#48f6ff;--chart-3:#3dff9f;
+  --particle-rgb:72,246,255;--particle-ring:72,246,255;--particle-size:1.3;--particle-speed:.25;--particle-motion:drift;
+}
+[data-theme="SODA_POP"]{
+  --bg:#fff7f2;--panel:rgba(255,255,255,.78);--text:#2a1633;--muted:#9a6d86;
+  --cyan:#ff5fa2;--pink:#ff8a3d;--green:#26c4a6;--red:#ff4b6e;--amber:#ffc247;
+  --line-rgb:255,138,168;--accent-rgb:255,95,162;
+  --line:rgba(255,138,168,.34);
+  --body-grad:radial-gradient(circle at 25% 10%,#ffe1ec 0,#fff2e6 42%,#fff7f2 100%);
+  --card-grad:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,236,244,.78));
+  --input-bg:#fff0f6;--th-bg:#ffe3ee;--bar-track:#ffe0d0;
+  --chart-1:#ff8a3d;--chart-2:#ff5fa2;--chart-3:#26c4a6;
+  --particle-rgb:255,205,60;--particle-ring:255,138,61;--particle-size:3.6;--particle-speed:.85;--particle-motion:rise;
+}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 25% 10%,#172a55 0,#050712 38%,#02030a 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial;overflow-x:hidden}
+body{margin:0;background:var(--body-grad);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial;overflow-x:hidden}
 canvas#bg{position:fixed;inset:0;z-index:-1;opacity:.65}
 .wrap{max-width:1500px;margin:0 auto;padding:24px}
 .hero{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;align-items:stretch}
-.card{background:linear-gradient(135deg,rgba(16,24,50,.82),rgba(6,10,22,.74));border:1px solid var(--line);border-radius:24px;box-shadow:0 0 40px rgba(72,246,255,.09),inset 0 0 30px rgba(255,255,255,.025);backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.card{background:var(--card-grad);border:1px solid var(--line);border-radius:24px;box-shadow:0 0 40px rgba(var(--accent-rgb),.09),inset 0 0 30px rgba(255,255,255,.025);backdrop-filter:blur(16px);position:relative;overflow:hidden}
 .card:before{content:"";position:absolute;inset:-1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);height:1px;opacity:.7}
 .title{padding:28px}
 .eyebrow{color:var(--cyan);letter-spacing:.28em;font-size:12px;text-transform:uppercase}
-.title h1{font-size:clamp(38px,6vw,84px);line-height:.9;margin:12px 0;text-shadow:0 0 24px rgba(72,246,255,.35)}
+.title h1{font-size:clamp(38px,6vw,84px);line-height:.9;margin:12px 0;text-shadow:0 0 24px rgba(var(--accent-rgb),.35)}
 .subtitle{color:var(--muted);font-size:18px}
 .controls{padding:22px;display:flex;flex-direction:column;gap:16px}
-select,button,input{background:#071124;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px 14px;font-size:15px;outline:none}
+select,button,input{background:var(--input-bg);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px 14px;font-size:15px;outline:none}
 button{cursor:pointer}
-button:hover{border-color:rgba(72,246,255,.8)}
+button:hover{border-color:rgba(var(--accent-rgb),.8)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:18px 0}
 .kpi{padding:18px;min-height:120px}
 .kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.16em}
@@ -31,37 +58,88 @@ button:hover{border-color:rgba(72,246,255,.8)}
 .main{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
 .chartBox{height:390px;padding:18px}
 .chartBox canvas{width:100%;height:310px}
-.sectionTitle{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d8fbff;margin:0 0 12px}
+.sectionTitle{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin:0 0 12px}
 .leader{padding:18px}
-.row{display:grid;grid-template-columns:58px 1fr 88px;gap:12px;padding:10px 0;border-bottom:1px solid rgba(124,240,255,.12);align-items:center}
+.row{display:grid;grid-template-columns:58px 1fr 88px;gap:12px;padding:10px 0;border-bottom:1px solid rgba(var(--line-rgb),.12);align-items:center}
 .pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--cyan);font-size:12px;text-align:center}
 .small{color:var(--muted);font-size:12px;margin-top:3px}
 .tableCard{margin-top:16px;padding:18px}
-.tableWrap{max-height:420px;overflow:auto;border-radius:16px;border:1px solid rgba(124,240,255,.14)}
+.tableWrap{max-height:420px;overflow:auto;border-radius:16px;border:1px solid rgba(var(--line-rgb),.14)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{position:sticky;top:0;background:#09152c;color:var(--cyan);text-align:left;padding:10px;z-index:2}
-td{padding:9px 10px;border-bottom:1px solid rgba(124,240,255,.08);color:#d8edf7;vertical-align:top}
+th{position:sticky;top:0;background:var(--th-bg);color:var(--cyan);text-align:left;padding:10px;z-index:2}
+td{padding:9px 10px;border-bottom:1px solid rgba(var(--line-rgb),.08);color:var(--text);vertical-align:top}
 .ticker{margin-top:16px;padding:14px 18px;white-space:nowrap;overflow:hidden}
-.ticker span{display:inline-block;padding-left:100%;animation:ticker 120s linear infinite;color:#b7f7ff}
+.ticker span{display:inline-block;padding-left:100%;animation:ticker 120s linear infinite;color:var(--cyan)}
 @keyframes ticker{to{transform:translateX(-100%)}}
 .tournamentGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
 .mini{padding:14px;cursor:pointer;transition:.2s}
-.mini:hover{transform:translateY(-3px);border-color:rgba(72,246,255,.8)}
-.bar{height:8px;background:#121a31;border-radius:999px;margin-top:10px;overflow:hidden}
+.mini:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.8)}
+.bar{height:8px;background:var(--bar-track);border-radius:999px;margin-top:10px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--green));border-radius:999px}
 .footer{color:var(--muted);font-size:12px;margin:18px 0}
-.status{border:1px solid rgba(124,240,255,.22);border-radius:16px;padding:12px 14px;background:rgba(7,17,36,.55)}
+.status{border:1px solid rgba(var(--line-rgb),.22);border-radius:16px;padding:12px 14px;background:var(--panel)}
 .status strong{color:var(--cyan)}
 .hidden{display:none}
 .error{border-color:rgba(255,75,110,.55);color:#ffdce3}
 .loadingPulse{animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
 @media(max-width:900px){.hero,.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:14px}.chartBox{height:330px}}
+
+/* ===== Loading overlay (sarcastic Picanto loader) ===== */
+#loader{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 40%,rgba(0,0,0,.55),rgba(0,0,0,.82));backdrop-filter:blur(7px)}
+#loader.show{display:flex}
+.loaderInner{text-align:center;padding:30px;max-width:520px}
+.picanto{width:230px;height:auto;margin:0 auto 6px;display:block;animation:carBob 1.2s ease-in-out infinite}
+@keyframes carBob{0%,100%{transform:translateY(0) rotate(-.6deg)}50%{transform:translateY(-7px) rotate(.6deg)}}
+.picanto .wheel{transform-box:fill-box;transform-origin:center;animation:wheelSpin 1s linear infinite}
+@keyframes wheelSpin{to{transform:rotate(360deg)}}
+.loaderRoad{width:240px;height:6px;margin:2px auto 22px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(var(--accent-rgb),.6),transparent);
+  animation:roadPulse 1.2s ease-in-out infinite}
+@keyframes roadPulse{0%,100%{opacity:.35}50%{opacity:.9}}
+.loaderMsg{color:var(--text);font-size:20px;font-weight:700;min-height:30px;letter-spacing:.01em;
+  text-shadow:0 0 18px rgba(var(--accent-rgb),.4);transition:opacity .25s}
+.loaderSub{color:var(--cyan);letter-spacing:.28em;font-size:11px;text-transform:uppercase;margin-top:14px}
+.loaderDots::after{content:"";animation:dots 1.4s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
 </style>
 </head>
 
 <body>
 <canvas id="bg"></canvas>
+
+<div id="loader">
+  <div class="loaderInner">
+    <svg class="picanto" viewBox="0 0 240 130" xmlns="http://www.w3.org/2000/svg" aria-label="Kia Picanto">
+      <!-- body -->
+      <path d="M14 92 C12 70 22 66 40 64 L70 40 C78 34 90 31 104 31 L150 31 C170 31 184 38 198 56 L214 62 C226 65 230 72 230 86 L230 96 C230 100 227 102 223 102 L201 102 A20 20 0 0 0 161 102 L95 102 A20 20 0 0 0 55 102 L21 102 C16 102 14 99 14 92 Z"
+            fill="var(--chart-2)" stroke="rgba(0,0,0,.25)" stroke-width="2"/>
+      <!-- windows -->
+      <path d="M78 44 C84 39 92 37 102 37 L120 37 L120 60 L66 60 Z" fill="rgba(255,255,255,.78)"/>
+      <path d="M126 37 L146 37 C160 37 170 42 180 56 L126 56 Z" fill="rgba(255,255,255,.78)"/>
+      <!-- headlight & grille -->
+      <circle cx="222" cy="80" r="5" fill="var(--amber)"/>
+      <rect x="206" y="90" width="20" height="5" rx="2" fill="rgba(0,0,0,.25)"/>
+      <!-- wheels -->
+      <g class="wheel">
+        <circle cx="75" cy="104" r="18" fill="#1a1a1f"/>
+        <circle cx="75" cy="104" r="8" fill="#c9ccd4"/>
+        <rect x="73.5" y="88" width="3" height="32" fill="#9aa0ad"/>
+        <rect x="59" y="102.5" width="32" height="3" fill="#9aa0ad"/>
+      </g>
+      <g class="wheel">
+        <circle cx="181" cy="104" r="18" fill="#1a1a1f"/>
+        <circle cx="181" cy="104" r="8" fill="#c9ccd4"/>
+        <rect x="179.5" y="88" width="3" height="32" fill="#9aa0ad"/>
+        <rect x="165" y="102.5" width="32" height="3" fill="#9aa0ad"/>
+      </g>
+    </svg>
+    <div class="loaderRoad"></div>
+    <div id="loaderMsg" class="loaderMsg">Reticulating splines</div>
+    <div class="loaderSub">The Syndicate <span class="loaderDots"></span></div>
+  </div>
+</div>
 
 <div class="wrap">
   <div class="hero">
@@ -155,6 +233,115 @@ const sel = document.getElementById("tournament");
 const canvas = document.getElementById("lineChart");
 const ctx = canvas.getContext("2d");
 
+// Reads a CSS custom property from the active [data-theme]; used by the
+// canvas drawing code so charts/particles follow the current theme.
+function themeColor(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// ===== Sarcastic loading overlay =====
+const LOADER_MESSAGES = [
+  "Reticulating splines",
+  "Amassing fortune",
+  "Calculating P&amp;L",
+  "Counting our millions (rounding up generously)",
+  "Saving up for the Kia Picanto",
+  "Checking if we can afford the Picanto yet... not quite",
+  "Test-driving the Kia Picanto",
+  "Booking the Picanto test drive",
+  "Reminding Nathan that a scooter is not a Picanto",
+  "Talking Nathan out of the scooter (again)",
+  "Buffering Nathan's scooter dreams",
+  "Ironing Phil's shirt",
+  "Polishing Phil's biceps",
+  "Confirming Phil's wardrobe remains immaculate",
+  "Phil emerging from the closet... of well-pressed shirts",
+  "Asking Aled if he's a Proper Football Man... jury's out",
+  "Aled explaining the offside rule (incorrectly)",
+  "Aled calling himself a PFM again",
+  "Consulting Linny and Trev (the only two who get betting)",
+  "Linny and Trev doing the actual maths",
+  "Letting Linny and Trev double-check everything",
+  "Manifesting generational wealth",
+  "Convincing ourselves The Syndicate will make us rich",
+  "Crunching the accumulators",
+  "Pretending we understand the odds",
+  "Dividing the winnings (wildly optimistically)",
+  "Counting chickens well before they hatch",
+  "Adding zeros to the bank balance (in our heads)",
+  "Hiding the losses from the wives",
+  "Refreshing our delusions of grandeur",
+  "Spline reticulation complete. Reticulating more splines.",
+  "Waiting for someone to actually vote in the poll",
+  "Poll uptake: catastrophic. Bumping it to the top again.",
+  "Watching everyone wait for a PFM to vote first",
+  "Detecting bandwagon... 6 votes landed in the last 3 seconds",
+  "Reminding the group that polls aren't decoration",
+  "Holding the poll open another 48 hours, just in case",
+  "Scouting CJ's latest can't-miss prodigy",
+  "Adding CJ's wonderkid to the watchlist (RIP)",
+  "Filing CJ's prodigy alongside the other 14 that came to nothing",
+  "Letting CJ explain why this one is different",
+  "Checking if Phil has surfaced... no, still lurking",
+  "Phil has read every message and replied to none",
+  "Phil lurking ominously in the group chat",
+  "Logging Cawston's latest gloriously random bet",
+  "Cawston backing something nobody can pronounce",
+  "Cawston throwing a fiver at pure chaos",
+  "Confirming that, yes, good players score",
+  "That's already priced in and it's a heavily juiced market",
+  "Consulting the IQ bell curve for betting strategy",
+  "Both ends agree: good players score",
+  "Filing a formal complaint about VAR",
+  "Waiting 4 minutes for VAR to ruin this too",
+  "Drawing imaginary offside lines (VAR is a disgrace)",
+  "Checking the armpit for offside... disallowed",
+];
+
+const loaderEl = document.getElementById("loader");
+const loaderMsgEl = document.getElementById("loaderMsg");
+let loaderMsgTimer = null;
+let loaderShownAt = 0;
+
+// Shuffle bag: cycle through every message once (in random order) before any repeat.
+let loaderBag = [];
+function nextLoaderMsg() {
+  if (loaderBag.length === 0) {
+    loaderBag = LOADER_MESSAGES.slice();
+    for (let i = loaderBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [loaderBag[i], loaderBag[j]] = [loaderBag[j], loaderBag[i]];
+    }
+  }
+  return loaderBag.pop();
+}
+
+function pickLoaderMsg() {
+  loaderMsgEl.style.opacity = "0";
+  setTimeout(() => {
+    loaderMsgEl.innerHTML = nextLoaderMsg();
+    loaderMsgEl.style.opacity = "1";
+  }, 220);
+}
+
+function showLoader() {
+  loaderShownAt = Date.now();
+  loaderBag = []; // fresh shuffled order each time the loader opens
+  loaderMsgEl.innerHTML = nextLoaderMsg();
+  loaderMsgEl.style.opacity = "1";
+  loaderEl.classList.add("show");
+  clearInterval(loaderMsgTimer);
+  loaderMsgTimer = setInterval(pickLoaderMsg, 2000);
+}
+
+function hideLoader(minMs = 2600) {
+  const wait = Math.max(0, minMs - (Date.now() - loaderShownAt));
+  setTimeout(() => {
+    clearInterval(loaderMsgTimer);
+    loaderEl.classList.remove("show");
+  }, wait);
+}
+
 function setStatus(message, type = "neutral") {
   const el = document.getElementById("apiStatus");
   el.className = "status small";
@@ -182,6 +369,7 @@ async function loadData() {
   }
 
   setStatus("Fetching live sheet data...", "loading");
+  showLoader();
 
   try {
     const res = await fetch(API_URL + "?cacheBust=" + Date.now(), { method: "GET" });
@@ -205,10 +393,12 @@ async function loadData() {
 
     const updated = json.updated ? new Date(json.updated).toLocaleString() : "unknown";
     setStatus(`Live data loaded · <strong>${DATA.summaries.length}</strong> tournaments · updated ${updated}`);
+    hideLoader();
 
   } catch (err) {
     console.error(err);
     setStatus("Could not load live data. Check the Apps Script URL, deployment permissions, and browser console.", "error");
+    hideLoader(900);
   }
 }
 
@@ -408,7 +598,7 @@ function drawLine(rows) {
     min -= 1;
   }
 
-  ctx.strokeStyle = "rgba(124,240,255,.18)";
+  ctx.strokeStyle = `rgba(${themeColor("--line-rgb") || "124,240,255"},.18)`;
   ctx.lineWidth = 1 * devicePixelRatio;
 
   for (let i = 0; i < 5; i++) {
@@ -423,13 +613,13 @@ function drawLine(rows) {
   const Y = v => h - p - (h - 2 * p) * (v - min) / (max - min);
 
   const grd = ctx.createLinearGradient(0, 0, w, 0);
-  grd.addColorStop(0, "#ff3df2");
-  grd.addColorStop(.5, "#48f6ff");
-  grd.addColorStop(1, "#3dff9f");
+  grd.addColorStop(0, themeColor("--chart-1"));
+  grd.addColorStop(.5, themeColor("--chart-2"));
+  grd.addColorStop(1, themeColor("--chart-3"));
 
   ctx.strokeStyle = grd;
   ctx.lineWidth = 4 * devicePixelRatio;
-  ctx.shadowColor = "#48f6ff";
+  ctx.shadowColor = themeColor("--chart-2");
   ctx.shadowBlur = 16 * devicePixelRatio;
   ctx.beginPath();
 
@@ -449,7 +639,7 @@ function drawLine(rows) {
   ctx.lineTo(w - p, Y(0));
   ctx.stroke();
 
-  ctx.fillStyle = "#8fa8bd";
+  ctx.fillStyle = themeColor("--muted");
   ctx.font = `${12 * devicePixelRatio}px system-ui`;
   ctx.fillText(fmtGBP(max), 8 * devicePixelRatio, Y(max) + 4 * devicePixelRatio);
   ctx.fillText(fmtGBP(min), 8 * devicePixelRatio, Y(min) + 4 * devicePixelRatio);
@@ -572,12 +762,21 @@ let particles = [];
 function bgResize() {
   bg.width = innerWidth * devicePixelRatio;
   bg.height = innerHeight * devicePixelRatio;
-  particles = Array.from({ length: 90 }, () => ({
-    x: Math.random() * bg.width,
-    y: Math.random() * bg.height,
-    vx: (Math.random() - .5) * .25 * devicePixelRatio,
-    vy: (Math.random() - .5) * .25 * devicePixelRatio
-  }));
+  const speed = (parseFloat(themeColor("--particle-speed")) || .25) * devicePixelRatio;
+  particles = Array.from({ length: 90 }, () => {
+    const baseX = Math.random() * bg.width;
+    return {
+      x: baseX, baseX,
+      y: Math.random() * bg.height,
+      vx: (Math.random() - .5) * speed,
+      vy: (Math.random() - .5) * speed,
+      // rise mode: float upward and sway side to side like a bubble
+      rise: (.6 + Math.random() * .9) * speed,
+      phase: Math.random() * Math.PI * 2,
+      swaySpeed: (.01 + Math.random() * .02),
+      swayAmp: (12 + Math.random() * 26) * devicePixelRatio
+    };
+  });
 }
 
 addEventListener("resize", bgResize);
@@ -585,20 +784,45 @@ bgResize();
 
 function anim() {
   bctx.clearRect(0, 0, bg.width, bg.height);
-  bctx.fillStyle = "rgba(72,246,255,.65)";
-  bctx.strokeStyle = "rgba(72,246,255,.08)";
+  const accent = themeColor("--accent-rgb") || "72,246,255";
+  const dot = themeColor("--particle-rgb") || accent;
+  const ring = themeColor("--particle-ring") || dot;
+  const dotSize = (parseFloat(themeColor("--particle-size")) || 1.3) * devicePixelRatio;
+  bctx.shadowColor = `rgba(${dot},.9)`;
+  bctx.shadowBlur = dotSize * 3;
+  bctx.fillStyle = `rgba(${dot},.9)`;
+  bctx.lineWidth = Math.max(1, dotSize * .45);
+  const rising = themeColor("--particle-motion") === "rise";
 
   for (const p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
-
-    if (p.x < 0 || p.x > bg.width) p.vx *= -1;
-    if (p.y < 0 || p.y > bg.height) p.vy *= -1;
+    if (rising) {
+      p.y -= p.rise;
+      p.phase += p.swaySpeed;
+      p.baseX += p.vx * .15;
+      p.x = p.baseX + Math.sin(p.phase) * p.swayAmp;
+      // recycle to the bottom once it floats off the top
+      if (p.y < -dotSize) {
+        p.y = bg.height + dotSize;
+        p.baseX = Math.random() * bg.width;
+      }
+      if (p.baseX < 0 || p.baseX > bg.width) p.vx *= -1;
+    } else {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > bg.width) p.vx *= -1;
+      if (p.y < 0 || p.y > bg.height) p.vy *= -1;
+    }
 
     bctx.beginPath();
-    bctx.arc(p.x, p.y, 1.3 * devicePixelRatio, 0, Math.PI * 2);
+    bctx.arc(p.x, p.y, dotSize, 0, Math.PI * 2);
     bctx.fill();
+    bctx.strokeStyle = `rgba(${ring},.95)`;
+    bctx.stroke();
   }
+
+  bctx.shadowBlur = 0;
+  bctx.lineWidth = devicePixelRatio;
+  bctx.strokeStyle = `rgba(${accent},.08)`;
 
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
